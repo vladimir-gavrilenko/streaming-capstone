@@ -1,8 +1,8 @@
 version: "3.7"
 
 services:
-  cassandra_seed:
-    container_name: cassandra_seed
+  cassandra-seed:
+    container_name: cassandra-seed
     image: cassandra:3.11.6
     environment:
       - HEAP_NEWSIZE=100M
@@ -12,19 +12,46 @@ services:
       - 7199:7199
       - 9160:9160
 
-  cassandra_node:
-    container_name: cassandra_node
+  cassandra-node:
+    container_name: cassandra-node
     image: cassandra:3.11.6
-    command: /bin/bash -c "echo 'Waiting for seed node' && sleep 30 && /docker-entrypoint.sh cassandra -f"
+    command: /bin/bash -c "sleep 20 && /docker-entrypoint.sh cassandra -f"
     environment:
-      - CASSANDRA_SEEDS=cassandra_seed
+      - CASSANDRA_SEEDS=cassandra-seed
       - HEAP_NEWSIZE=100M
       - MAX_HEAP_SIZE=400M
     depends_on:
-      - cassandra_seed
+      - cassandra-seed
 
   redis:
     container_name: redis
     image: redis:5.0.8
     ports:
       - 6379:6379
+
+  spark-master:
+    container_name: spark-master
+    build:
+      context: docker/spark
+    image: spark:latest
+    hostname: spark-master
+    command: /bin/bash -c "bin/spark-class org.apache.spark.deploy.master.Master -h spark-master"
+    expose:
+      - 7077
+    ports:
+      - 4040:4040
+      - 7077:7077
+      - 8080:8080
+    depends_on:
+      - cassandra-node
+      - redis
+
+  spark-worker:
+    container_name: spark-worker
+    image: spark:latest
+    command: /bin/bash -c "sleep 5 && bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077"
+    ports:
+      - 8081:8081
+      - 4041:4040
+    depends_on:
+      - spark-master
