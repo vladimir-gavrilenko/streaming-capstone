@@ -1,0 +1,30 @@
+version: "3.7"
+
+services:
+  cassandra_seed:
+    container_name: cassandra_seed
+    image: cassandra:3.11.6
+    environment:
+      - HEAP_NEWSIZE=100M
+      - MAX_HEAP_SIZE=400M
+    ports:
+      - 9042:9042
+      - 7199:7199
+      - 9160:9160
+
+  cassandra_node:
+    container_name: cassandra_node
+    image: cassandra:3.11.6
+    command: /bin/bash -c "echo 'Waiting for seed node' && sleep 30 && /docker-entrypoint.sh cassandra -f"
+    environment:
+      - CASSANDRA_SEEDS=cassandra_seed
+      - HEAP_NEWSIZE=100M
+      - MAX_HEAP_SIZE=400M
+    depends_on:
+      - cassandra_seed
+
+  redis:
+    container_name: redis
+    image: redis:5.0.8
+    ports:
+      - 6379:6379
