@@ -5,8 +5,8 @@ services:
     container_name: cassandra-seed
     image: cassandra:3.11.6
     environment:
-      - HEAP_NEWSIZE=100M
-      - MAX_HEAP_SIZE=400M
+      HEAP_NEWSIZE: 100M
+      MAX_HEAP_SIZE: 400M
     ports:
       - 9042:9042
       - 7199:7199
@@ -17,9 +17,9 @@ services:
     image: cassandra:3.11.6
     command: /bin/bash -c "sleep 20 && /docker-entrypoint.sh cassandra -f"
     environment:
-      - CASSANDRA_SEEDS=cassandra-seed
-      - HEAP_NEWSIZE=100M
-      - MAX_HEAP_SIZE=400M
+      CASSANDRA_SEEDS: cassandra-seed
+      HEAP_NEWSIZE: 100M
+      MAX_HEAP_SIZE: 400M
     depends_on:
       - cassandra-seed
 
@@ -31,13 +31,11 @@ services:
 
   spark-master:
     container_name: spark-master
+    hostname: spark-master
     build:
       context: docker/spark
     image: spark:latest
-    hostname: spark-master
-    command: /bin/bash -c "bin/spark-class org.apache.spark.deploy.master.Master -h spark-master"
-    expose:
-      - 7077
+    command: /bin/bash -c "./start-master.sh"
     ports:
       - 4040:4040
       - 7077:7077
@@ -49,9 +47,47 @@ services:
   spark-worker:
     container_name: spark-worker
     image: spark:latest
-    command: /bin/bash -c "sleep 5 && bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077"
+    command: /bin/bash -c "./start-worker.sh spark-master"
     ports:
       - 8081:8081
       - 4041:4040
     depends_on:
       - spark-master
+
+  zookeeper:
+    container_name: zookeeper
+    image: zookeeper:3.4.14
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2181
+
+  kafka-seed:
+    container_name: kafka-seed
+    build:
+      context: docker/kafka
+    image: kafka:latest
+    ports:
+      - 9092:9092
+    environment:
+      BROKER_ID: 0
+      ZOOKEEPER: zookeeper:2181
+    depends_on:
+      - zookeeper
+
+  kafka-broker:
+    container_name: kafka-broker
+    image: kafka:latest
+    environment:
+      BROKER_ID: 1
+      ZOOKEEPER: zookeeper:2181
+    depends_on:
+      - kafka-seed
+
+  kafka-init:
+    container_name: kafka-init
+    image: kafka:latest
+    command: /bin/bash -c "./init-cluster.sh"
+    depends_on:
+      - kafka-broker
