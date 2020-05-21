@@ -33,7 +33,7 @@ services:
     container_name: spark-master
     hostname: spark-master
     build:
-      context: docker/spark
+      context: spark
     image: spark:latest
     command: /bin/bash -c "./start-master.sh"
     ports:
@@ -50,7 +50,7 @@ services:
     command: /bin/bash -c "./start-worker.sh spark-master"
     ports:
       - 8081:8081
-      - 4041:4040
+      - 4041:4041
     depends_on:
       - spark-master
 
@@ -66,7 +66,7 @@ services:
   kafka-seed:
     container_name: kafka-seed
     build:
-      context: docker/kafka
+      context: kafka
     image: kafka:latest
     ports:
       - 9092:9092
