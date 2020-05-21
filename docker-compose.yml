@@ -50,7 +50,7 @@ services:
     command: /bin/bash -c "./start-worker.sh spark-master"
     ports:
       - 8081:8081
-      - 4041:4041
+      - 4041:4040
     depends_on:
       - spark-master
 
@@ -79,6 +79,8 @@ services:
   kafka-broker:
     container_name: kafka-broker
     image: kafka:latest
+    ports:
+      - 9093:9092
     environment:
       BROKER_ID: 1
       ZOOKEEPER: zookeeper:2181
