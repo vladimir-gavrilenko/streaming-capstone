@@ -1,14 +1,12 @@
-FROM openjdk:8-alpine
+FROM mozilla/sbt:8u232_1.3.8
 
-RUN apk add --no-cache bash && \
-    apk add --no-cache procps && \
-    apk add --no-cache coreutils
+RUN apt-get update && apt-get install wait-for-it
 
 ENV SPARK_VERSION 2.4.5
 ENV SPARK_HOME /usr/lib/spark
 
 RUN cd /tmp && \
-    wget https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz && \
+    wget -nv https://archive.apache.org/dist/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop2.7.tgz && \
     tar zxf spark-${SPARK_VERSION}-bin-hadoop2.7.tgz && \
     rm -rf spark-${SPARK_VERSION}-bin-hadoop2.7.tgz && \
     mv spark-${SPARK_VERSION}-bin-hadoop2.7 ${SPARK_HOME}

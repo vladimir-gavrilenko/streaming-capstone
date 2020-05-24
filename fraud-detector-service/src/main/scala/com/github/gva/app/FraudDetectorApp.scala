@@ -11,13 +11,18 @@ object FraudDetectorApp {
       case None => throw new RuntimeException
     }
     val spark = SparkSession.builder().getOrCreate()
+    spark.sparkContext.setLogLevel("WARN")
     val botDetector = new FraudDetector
 
     val events = spark
       .readStream
       .format("kafka")
-      .option("bootstrap.servers", config.kafkaSourceBootstrapServers)
+      .option("kafka.bootstrap.servers", config.kafkaSourceBootstrapServers)
+      .option("subscribe", config.kafkaSourceTopic)
+      .option("kafkaConsumer.pollTimeoutMs", 2000)
+      .option("fetchOffset.retryIntervalMs", 200)
       .load()
+      .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
 
     val botsQuery = botDetector.detectBots(events)
       .writeStream

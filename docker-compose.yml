@@ -40,9 +40,6 @@ services:
       - 4040:4040
       - 7077:7077
       - 8080:8080
-    depends_on:
-      - cassandra-node
-      - redis
 
   spark-worker:
     container_name: spark-worker
@@ -90,6 +87,24 @@ services:
   kafka-init:
     container_name: kafka-init
     image: kafka:latest
-    command: /bin/bash -c "./init-cluster.sh"
+    command: /bin/bash -c "./init-cluster.sh kafka-seed"
     depends_on:
       - kafka-broker
+
+  fraud-detector-service:
+    container_name: fraud-detector-service
+    build:
+      context: fraud-detector-service
+    image: fraud-detector-service:latest
+    ports:
+      - 4444:4040
+    environment:
+      KAFKA: kafka-seed:9092
+      SPARK: spark-master:7077
+      REDIS: redis:6379
+      CASSANDRA: cassandra-seed:9042
+    depends_on:
+      - kafka-init
+      - spark-master
+      - redis
+      - cassandra-seed

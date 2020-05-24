@@ -1,8 +1,6 @@
-FROM openjdk:8-alpine
+FROM mozilla/sbt:8u232_1.3.8
 
-RUN apk add --no-cache bash && \
-    apk add --no-cache procps && \
-    apk add --no-cache coreutils
+RUN apt-get update && apt-get install wait-for-it
 
 ENV KAFKA_VERSION 2.5.0
 ENV KAFKA_SCALA_VERSION 2.12
@@ -11,7 +9,7 @@ ENV BROKER_ID 0
 ENV ZOOKEEPER localhost:2181
 
 RUN cd /tmp && \
-    wget https://downloads.apache.org/kafka/${KAFKA_VERSION}/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz && \
+    wget -nv https://downloads.apache.org/kafka/${KAFKA_VERSION}/kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz && \
     tar zxf kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz && \
     rm -rf kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION}.tgz && \
     mv kafka_${KAFKA_SCALA_VERSION}-${KAFKA_VERSION} ${KAFKA_HOME}
@@ -21,4 +19,4 @@ COPY ./*.sh ${KAFKA_HOME}/
 EXPOSE 9092
 
 WORKDIR ${KAFKA_HOME}
-CMD ["./start.sh"]
+CMD ["./start.sh", "${ZOOKEEPER}"]
