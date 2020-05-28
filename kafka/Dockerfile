@@ -1,4 +1,4 @@
-FROM mozilla/sbt:8u232_1.3.8
+FROM openjdk:8
 
 RUN apt-get update && apt-get install wait-for-it
 
