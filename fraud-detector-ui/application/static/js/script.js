@@ -29,6 +29,19 @@ function displayBots() {
     xhr.send(null);
 }
 
+function displayTotal() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/total', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function() {
+        var total = JSON.parse(xhr.responseText)['total'];
+        console.log(total);
+        var totalElement = document.getElementById('total');
+        totalElement.textContent = total;
+    };
+    xhr.send(null);
+}
+
 function main() {
     console.log('main')
     setInterval(displayBots, 2000);

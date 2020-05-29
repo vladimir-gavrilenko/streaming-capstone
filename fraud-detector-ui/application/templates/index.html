@@ -23,14 +23,23 @@
         </div>
         <div class="column dark">
             <h2>Active Bots</h2>
-            <p>List of active bots</p>
+            <p>List of active bots (refreshes automatically)</p>
             <ul id="active-bots">
                 <li>test</li>
             </ul>
         </div>
         <div class="column light">
             <h2>History</h2>
-            <p>Some text..</p>
+            <p>Total number of records in Cassandra</p>
+            <div>
+                <div>
+                    <label for="total">Value:</label>
+                    <span id="total">???</span>
+                </div>
+                <div>
+                    <input type="button" value="Get!" onclick="displayTotal()">
+                </div>
+            </div>
         </div>
     </div>
     <script>main();</script>
