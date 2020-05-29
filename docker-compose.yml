@@ -23,6 +23,22 @@ services:
     depends_on:
       - cassandra-seed
 
+  cassandra-init:
+    container_name: cassandra-init
+    image: cassandra:3.11.6
+    environment:
+      CASSANDRA_SEEDS: cassandra-seed
+      HEAP_NEWSIZE: 100M
+      MAX_HEAP_SIZE: 400M
+    depends_on:
+      - cassandra-seed
+      - cassandra-node
+    volumes:
+      - type: bind
+        source: ./cassandra
+        target: /app
+    entrypoint: /bin/bash -c "/app/init.sh"
+
   redis:
     container_name: redis
     image: redis:5.0.8
@@ -89,6 +105,7 @@ services:
     image: kafka:latest
     command: /bin/bash -c "./init-cluster.sh kafka-seed"
     depends_on:
+      - kafka-seed
       - kafka-broker
 
   fraud-detector-service:
