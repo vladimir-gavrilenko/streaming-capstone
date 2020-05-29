@@ -6,32 +6,33 @@
     <script src={{ url_for('static', filename='js/script.js') }}></script>
 </head>
 <body>
-
-<h2>Fraud Detector UI</h2>
-
-<div class="column-container">
-    <div class="column light">
-        <h2>Client</h2>
-        <p>Send events by providing an IP address</p>
-        <form id="send-event">
-            <div>
-                <label for="ip">IP address:</label>
-            </div>
-            <div>
-                <input type="text" id="ip" value="1.2.3.4">
-                <input type="button" value="Send!" onclick="submitEvent()">
-            </div>
-        </form>
+    <h2>Fraud Detector UI</h2>
+    <div class="column-container">
+        <div class="column light">
+            <h2>Client</h2>
+            <p>Send events by providing an IP address</p>
+            <form id="send-event">
+                <div>
+                    <label for="ip">Comma-separated IP addresses:</label>
+                </div>
+                <div>
+                    <input type="text" id="ips" value="1.2.3.4,5.6.7.8">
+                    <input type="button" value="Send!" onclick="submitEvents()">
+                </div>
+            </form>
+        </div>
+        <div class="column dark">
+            <h2>Active Bots</h2>
+            <p>List of active bots</p>
+            <ul id="active-bots">
+                <li>test</li>
+            </ul>
+        </div>
+        <div class="column light">
+            <h2>History</h2>
+            <p>Some text..</p>
+        </div>
     </div>
-    <div class="column dark">
-        <h2>Active Bots</h2>
-        <p>Some text..</p>
-    </div>
-    <div class="column light">
-        <h2>History</h2>
-        <p>Some text..</p>
-    </div>
-</div>
-
+    <script>main();</script>
 </body>
 </html>
