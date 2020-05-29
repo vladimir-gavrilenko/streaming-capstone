@@ -108,3 +108,20 @@ services:
       - spark-master
       - redis
       - cassandra-seed
+
+  fraud-detector-ui:
+    container_name: fraud-detector-ui
+    build:
+      context: fraud-detector-ui
+    image: fraud-detector-ui:latest
+    ports:
+      - 5000:5000
+    environment:
+      KAFKA: kafka-seed:9092
+      REDIS: redis:6379
+      CASSANDRA: cassandra-seed:9042
+    depends_on:
+      - kafka-init
+      - spark-master
+      - redis
+      - cassandra-seed
