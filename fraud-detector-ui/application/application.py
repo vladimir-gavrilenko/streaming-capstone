@@ -1,8 +1,15 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
 
 @app.route('/')
-def hello_world():
+def index():
     return render_template('index.html')
+
+
+@app.route('/events', methods=['POST'])
+def event():
+    ip = request.form['ip']
+    print(ip)
+    return '', 201

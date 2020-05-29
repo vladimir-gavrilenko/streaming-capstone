@@ -15,6 +15,7 @@ html, body {
 .column {
     display: table-cell;
     padding-left: 2%;
+    width: 33%;
 }
 
 .light {
