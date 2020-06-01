@@ -1,4 +1,3 @@
-import random
 from datetime import datetime
 from typing import List
 
@@ -27,7 +26,14 @@ def get_status():
     redis_info = redis_client.info()
     print(f'redis_info: {redis_info}')
     redis_status = bool(redis_info)
-    return jsonify(kafka_status=kafka_status, redis_status=redis_status)
+    cassandra_client: Cluster = Clients.get('cassandra')
+    cassandra_session = cassandra_client.connect()
+    cassandra_status = cassandra_session.is_shutdown
+    return jsonify(
+        kafka_status=kafka_status,
+        redis_status=redis_status,
+        cassandra_status=cassandra_status
+    )
 
 
 @app.route('/events', methods=['POST'])
@@ -50,8 +56,7 @@ def get_bots():
 @app.route('/total')
 def get_total():
     cassandra_cluster: Cluster = Clients.get('cassandra')
-    session = cassandra_cluster.connect('system')
-    res = session.execute('SELECT * FROM schema_keyspaces;')
-    print(res)
-    total = random.randint(0, 10)
+    with cassandra_cluster.connect() as session:
+        total = session.execute('select count(*) from fraud.bots').one()[0]
+        print(total)
     return jsonify(total=total)
