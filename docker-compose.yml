@@ -37,6 +37,10 @@ services:
       - type: bind
         source: ./cassandra
         target: /app
+      - type: volume
+        source: init-storage
+        target: /state
+        read_only: false
     entrypoint: /bin/bash -c "/app/init.sh"
 
   redis:
@@ -103,10 +107,15 @@ services:
   kafka-init:
     container_name: kafka-init
     image: kafka:latest
-    command: /bin/bash -c "./init-cluster.sh kafka-seed"
+    command: /bin/bash -c "./init-cluster.sh kafka-seed kafka-broker"
     depends_on:
       - kafka-seed
       - kafka-broker
+    volumes:
+      - type: volume
+        source: init-storage
+        target: /state
+        read_only: false
 
   fraud-detector-service:
     container_name: fraud-detector-service
@@ -125,6 +134,11 @@ services:
       - spark-master
       - redis
       - cassandra-seed
+    volumes:
+      - type: volume
+        source: init-storage
+        target: /state
+        read_only: true
 
   fraud-detector-ui:
     container_name: fraud-detector-ui
@@ -142,3 +156,11 @@ services:
       - spark-master
       - redis
       - cassandra-seed
+    volumes:
+      - type: volume
+        source: init-storage
+        target: /state
+        read_only: true
+
+volumes:
+  init-storage:

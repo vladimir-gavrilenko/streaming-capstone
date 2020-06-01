@@ -19,3 +19,5 @@ while [[ $SLAVE_HOSTS -eq 0 ]]; do
 done
 
 cqlsh --file /app/init.cql $CASSANDRA_SEEDS
+
+touch /state/cassandra
