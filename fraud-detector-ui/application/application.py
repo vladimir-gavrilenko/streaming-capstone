@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from typing import List
 
@@ -38,11 +39,16 @@ def get_status():
 
 @app.route('/events', methods=['POST'])
 def create_events():
+    event_time = datetime.now().timestamp()
     ips: List[str] = request.form['ips'].split(',')
     producer: KafkaProducer = Clients.get('kafka-producer')
-    now = datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
     for ip in ips:
-        producer.send('events', key=ip.encode('utf-8'), value=now.encode('utf-8'))
+        event = json.dumps({
+            'epoch_seconds': event_time,
+            'type': 'click'
+        })
+        producer.send('events', key=ip.encode('utf-8'), value=event.encode('utf-8'))
+    producer.flush(timeout=5)
     return '', 201
 
 
