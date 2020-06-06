@@ -29,7 +29,7 @@ def get_status():
     redis_status = bool(redis_info)
     cassandra_client: Cluster = Clients.get('cassandra')
     cassandra_session = cassandra_client.connect()
-    cassandra_status = cassandra_session.is_shutdown
+    cassandra_status = not cassandra_session.is_shutdown
     return jsonify(
         kafka_status=kafka_status,
         redis_status=redis_status,
@@ -44,8 +44,9 @@ def create_events():
     producer: KafkaProducer = Clients.get('kafka-producer')
     for ip in ips:
         event = json.dumps({
-            'epoch_seconds': event_time,
-            'type': 'click'
+            'ip': ip,
+            'action': 'click',
+            'epochSeconds': int(event_time)
         })
         producer.send('events', key=ip.encode('utf-8'), value=event.encode('utf-8'))
     producer.flush(timeout=5)
@@ -55,7 +56,11 @@ def create_events():
 @app.route('/bots')
 def get_bots():
     redis_client: Redis = Clients.get('redis')
-    bots = [bot for bot in redis_client.scan_iter('bots:*')]
+    prefix = 'bots:'
+    bots = [
+        bot.decode()[len(prefix)]
+        for bot in redis_client.scan_iter(f'{prefix}*')
+    ]
     return jsonify(bots=bots)
 
 

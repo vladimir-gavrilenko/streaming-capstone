@@ -1,12 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 
-wait-for-it "${CASSANDRA}" -t 60
-wait-for-it "${KAFKA}" -t 60
-wait-for-it "${REDIS}" -t 60
-wait-for-it "${SPARK}" -t 60
-
-while ! ls /state/cassandra && ! ls /state/kafka; do
+while [ ! -f /state/cassandra ] && [ ! -f /state/kafka ] ; do
     echo "Waiting for Cassandra and Kafka to be initialized..."
     sleep 5
 done
@@ -20,4 +15,8 @@ done
   --packages "org.apache.spark:spark-sql-kafka-0-10_2.11:${SPARK_VERSION}" \
   ./fraud-detector-service.jar \
   --kafka-bootstrap-servers "${KAFKA}" \
-  --kafka-topic events
+  --kafka-topic events \
+  --redis "${REDIS}" \
+  --redis-prefix bots \
+  --cassandra ${CASSANDRA} \
+  --cassandra-table fraud.bots
