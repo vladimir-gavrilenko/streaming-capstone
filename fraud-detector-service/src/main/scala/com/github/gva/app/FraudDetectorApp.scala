@@ -5,7 +5,7 @@ import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.catalyst.ScalaReflection
 import org.apache.spark.sql.functions.col
 import org.apache.spark.sql.functions.from_json
-import org.apache.spark.sql.streaming.OutputMode
+import org.apache.spark.sql.streaming.{OutputMode, StreamingQuery}
 import org.apache.spark.sql.types.{StringType, StructType}
 
 object FraudDetectorApp {
@@ -14,16 +14,33 @@ object FraudDetectorApp {
       case Some(c) => c
       case None => throw new RuntimeException("Failed to parse passed arguments...")
     }
+    val spark = buildSparkSession(config)
+    val fraudDetector = new FraudDetector
+    val eventsSchema = ScalaReflection.schemaFor[Event].dataType.asInstanceOf[StructType]
+    val events = readEventsStream(spark, config, eventsSchema)
+    val bots = fraudDetector.detectBots(events)
+    val activeBotsQuery = writeActiveBotsQuery(bots, config)
+    val botsHistoryQuery = writeBotsHistoryQuery(bots, config)
+    activeBotsQuery.awaitTermination()
+    botsHistoryQuery.awaitTermination()
+  }
+
+  private def buildSparkSession(config: FraudDetectorConfig) = {
     val spark = SparkSession
       .builder()
       .config("spark.redis.host", config.redisHost)
       .config("spark.redis.port", config.redisPort)
       .getOrCreate()
     spark.sparkContext.setLogLevel("WARN")
+    spark
+  }
 
-    val botDetector = new FraudDetector
-
-    val kafkaStream = spark
+  private def readEventsStream(
+    spark: SparkSession,
+    config: FraudDetectorConfig,
+    eventsSchema: StructType
+  ): DataFrame = {
+    spark
       .readStream
       .format("kafka")
       .option("kafka.bootstrap.servers", config.kafkaBootstrapServers)
@@ -31,16 +48,13 @@ object FraudDetectorApp {
       .option("kafkaConsumer.pollTimeoutMs", 2000)
       .option("fetchOffset.retryIntervalMs", 200)
       .load()
-
-    val eventsSchema = ScalaReflection.schemaFor[Event].dataType.asInstanceOf[StructType]
-    val events: DataFrame = kafkaStream
       .select(col("value").cast(StringType))
       .withColumn("parsed", from_json(col("value"), eventsSchema))
       .select("parsed.*")
+  }
 
-    val botsQuery = botDetector.detectBots(events)
-
-    val redisStream = botsQuery
+  private def writeActiveBotsQuery(bots: DataFrame, config: FraudDetectorConfig): StreamingQuery = {
+    bots
       .writeStream
       .outputMode(OutputMode.Update) // AnalysisException: Complete output mode not supported when there are no streaming aggregations on streaming DataFrames/Datasets;
       .foreachBatch { (batch: DataFrame, _) =>
@@ -54,7 +68,13 @@ object FraudDetectorApp {
           .save()
       }
       .start()
+  }
 
-    redisStream.awaitTermination()
+  def writeBotsHistoryQuery(bots: DataFrame, config: FraudDetectorConfig): StreamingQuery = {
+    bots
+      .writeStream
+      .outputMode(OutputMode.Append)
+      .format("console")
+      .start()
   }
 }
