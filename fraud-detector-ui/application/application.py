@@ -58,7 +58,7 @@ def get_bots():
     redis_client: Redis = Clients.get('redis')
     prefix = 'bots:'
     bots = [
-        bot.decode()[len(prefix)]
+        bot.decode()[len(prefix):]
         for bot in redis_client.scan_iter(f'{prefix}*')
     ]
     return jsonify(bots=bots)
