@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 set -eu
-KAFKA_SEED="${1}:9092"
-KAFKA_BROKER="${2}:9092"
 
 wait-for-it "${KAFKA_SEED}" -t 60
 wait-for-it "${KAFKA_BROKER}" -t 60
@@ -22,4 +20,4 @@ echo "details for 'events':"
   --bootstrap-server "${KAFKA_SEED}" \
   --describe events
 
-touch /state/kafka
+touch "${KAFKA_INIT_STATE_MARKER}"

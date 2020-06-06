@@ -30,6 +30,7 @@ services:
       CASSANDRA_SEEDS: cassandra-seed
       HEAP_NEWSIZE: 100M
       MAX_HEAP_SIZE: 400M
+      CASSANDRA_INIT_STATE_MARKER: /state/cassandra
     depends_on:
       - cassandra-seed
       - cassandra-node
@@ -64,10 +65,12 @@ services:
   spark-worker:
     container_name: spark-worker
     image: spark:latest
-    command: /bin/bash -c "./start-worker.sh spark-master"
+    command: /bin/bash -c "./start-worker.sh"
     ports:
       - 8081:8081
       - 4041:4040
+    environment:
+      SPARK_MASTER: spark-master:7077
     depends_on:
       - spark-master
 
@@ -107,7 +110,11 @@ services:
   kafka-init:
     container_name: kafka-init
     image: kafka:latest
-    command: /bin/bash -c "./init-cluster.sh kafka-seed kafka-broker"
+    command: /bin/bash -c "./init.sh"
+    environment:
+      KAFKA_SEED: kafka-seed:9092
+      KAFKA_BROKER: kafka-broker:9092
+      KAFKA_INIT_STATE_MARKER: /state/kafka
     depends_on:
       - kafka-seed
       - kafka-broker
@@ -129,6 +136,8 @@ services:
       SPARK: spark-master:7077
       REDIS: redis:6379
       CASSANDRA: cassandra-seed:9042
+      KAFKA_INIT_STATE_MARKER: /state/kafka
+      CASSANDRA_INIT_STATE_MARKER: /state/cassandra
     depends_on:
       - kafka-init
       - spark-master
@@ -151,6 +160,8 @@ services:
       KAFKA: kafka-seed:9092
       REDIS: redis:6379
       CASSANDRA: cassandra-seed:9042
+      CASSANDRA_INIT_STATE_MARKER: /state/cassandra
+      KAFKA_INIT_STATE_MARKER: /state/kafka
     depends_on:
       - kafka-init
       - spark-master
