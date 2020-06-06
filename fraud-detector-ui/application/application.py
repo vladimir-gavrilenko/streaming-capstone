@@ -17,26 +17,6 @@ def get_index():
     return render_template('index.html')
 
 
-@app.route('/status')
-def get_status():
-    consumer: KafkaConsumer = Clients.get('kafka-consumer')
-    kafka_topics = consumer.topics()
-    print(f'topics: {kafka_topics}')
-    kafka_status = 'events' in kafka_topics
-    redis_client: Redis = Clients.get('redis')
-    redis_info = redis_client.info()
-    print(f'redis_info: {redis_info}')
-    redis_status = bool(redis_info)
-    cassandra_client: Cluster = Clients.get('cassandra')
-    cassandra_session = cassandra_client.connect()
-    cassandra_status = not cassandra_session.is_shutdown
-    return jsonify(
-        kafka_status=kafka_status,
-        redis_status=redis_status,
-        cassandra_status=cassandra_status
-    )
-
-
 @app.route('/events', methods=['POST'])
 def create_events():
     event_time = datetime.now().timestamp()
@@ -71,3 +51,21 @@ def get_total():
         total = session.execute('select count(*) from fraud.bots').one()[0]
         print(total)
     return jsonify(total=total)
+
+
+@app.route('/status')
+def get_status():
+    consumer: KafkaConsumer = Clients.get('kafka-consumer')
+    kafka_topics = consumer.topics()
+    kafka_status = 'events' in kafka_topics
+    redis_client: Redis = Clients.get('redis')
+    redis_info = redis_client.info()
+    redis_status = bool(redis_info)
+    cassandra_client: Cluster = Clients.get('cassandra')
+    cassandra_session = cassandra_client.connect()
+    cassandra_status = not cassandra_session.is_shutdown
+    return jsonify(
+        kafka_status=kafka_status,
+        redis_status=redis_status,
+        cassandra_status=cassandra_status
+    )
