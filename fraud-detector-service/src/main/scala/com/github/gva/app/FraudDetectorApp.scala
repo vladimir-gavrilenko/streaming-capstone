@@ -19,6 +19,7 @@ object FraudDetectorApp {
     val eventsSchema = ScalaReflection.schemaFor[Event].dataType.asInstanceOf[StructType]
     val events = readEventsStream(spark, config, eventsSchema)
     val bots = fraudDetector.detectBots(events)
+    // TODO: checkpoint location
     val activeBotsQuery = writeActiveBotsQuery(bots, config)
     val botsHistoryQuery = writeBotsHistoryQuery(bots, config)
     activeBotsQuery.awaitTermination()
