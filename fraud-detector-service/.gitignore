@@ -1,2 +1,15 @@
 .idea/
 *target/
+
+    kafka-bootstrap-servers")
+    kafka-topic")
+    redis")
+    redis-prefix")
+    cassandra")
+    cassandra-table")
+    redis-checkpoint")
+    cassandra-checkpoint")
+    bot-ttl-seconds")
+    bot-threshold-interval-slide-seconds")
+    bot-threshold-interval-seconds")
+    bot-threshold-num-events-per-interval")

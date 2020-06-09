@@ -23,7 +23,6 @@ object FraudDetectorApp {
       slideDuration = config.botThresholdIntervalSlideSeconds,
       eventsPerWindowThreshold = config.botThresholdNumOfEventsPerInterval
     )
-    // TODO: checkpoint location
     val activeBotsQuery = writeActiveBotsQuery(bots, config)
     val botsHistoryQuery = writeBotsHistoryQuery(bots, config)
     activeBotsQuery.awaitTermination()
@@ -61,6 +60,7 @@ object FraudDetectorApp {
   private def writeActiveBotsQuery(bots: DataFrame, config: FraudDetectorConfig): StreamingQuery = {
     bots
       .writeStream
+      .option("checkpointLocation", config.redisCheckpoint)
       .outputMode(OutputMode.Complete)
       .foreachBatch { (batch: DataFrame, _) =>
         batch
@@ -80,6 +80,7 @@ object FraudDetectorApp {
       .select("ip")
       .withColumn("marked_at", current_timestamp())
       .writeStream
+      .option("checkpointLocation", config.cassandraCheckpoint)
       .outputMode(OutputMode.Update)
       .format("org.apache.spark.sql.cassandra")
       .option("keyspace", config.cassandraKeyspace)

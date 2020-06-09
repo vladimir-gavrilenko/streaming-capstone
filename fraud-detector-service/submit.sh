@@ -19,5 +19,12 @@ done
   --kafka-topic events \
   --redis "${REDIS}" \
   --redis-prefix bots \
-  --cassandra ${CASSANDRA} \
-  --cassandra-table fraud.bots
+  --cassandra "${CASSANDRA}" \
+  --cassandra-table fraud.bots \
+  --redis-checkpoint "${ACTIVE_BOTS_CHECKPOIN_LOCATION}" \
+  --cassandra-checkpoint "${HISTORY_CHECKPOINT_LOCATION}" \
+  --bot-ttl-seconds 20 \
+  --bot-threshold-interval-slide-seconds 1 \
+  --bot-threshold-interval-seconds 10 \
+  --bot-threshold-num-events-per-interval 20 \
+
