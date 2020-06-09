@@ -62,7 +62,7 @@ object FraudDetectorApp {
     bots
       .writeStream
       .option("checkpointLocation", config.redisCheckpoint)
-      .outputMode(OutputMode.Complete)
+      .outputMode(OutputMode.Update)
       .foreachBatch { (batch: DataFrame, _) =>
         batch
           .write
