@@ -50,7 +50,7 @@ object FraudDetectorApp {
       .format("kafka")
       .option("kafka.bootstrap.servers", config.kafkaBootstrapServers)
       .option("subscribe", config.kafkaTopic)
-      .option("kafkaConsumer.pollTimeoutMs", 2000)
+      .option("kafkaConsumer.pollTimeoutMs", 1000)
       .option("fetchOffset.retryIntervalMs", 200)
       .load()
       .select(col("value").cast(StringType))
