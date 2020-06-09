@@ -8,7 +8,10 @@ case class FraudDetectorConfig(
   redisPrefix: String = "bots",
   cassandra: String = "cassandra",
   cassandraTable: String = "fraud.bots",
-  botTtlSeconds: Int = 10
+  botTtlSeconds: Int = 10,
+  botThresholdIntervalSlideSeconds: Int = 1,
+  botThresholdIntervalSeconds: Int = 10,
+  botThresholdNumOfEventsPerInterval: Int = 20
 )
 
 object FraudDetectorConfig {
@@ -41,8 +44,17 @@ object FraudDetectorConfig {
       .required()
       .action((x, c) => c.copy(cassandraTable = x))
 
-    opt[Int]("ttl")
+    opt[Int]("bot-ttl-seconds")
       .action((x, c) => c.copy(botTtlSeconds = x))
+
+    opt[Int]("bot-threshold-interval-slide-seconds")
+      .action((x, c) => c.copy(botThresholdIntervalSlideSeconds = x))
+
+    opt[Int]("bot-threshold-interval-seconds")
+      .action((x, c) => c.copy(botThresholdIntervalSeconds = x))
+
+    opt[Int]("bot-threshold-num-events-per-interval")
+      .action((x, c) => c.copy(botThresholdNumOfEventsPerInterval = x))
   }
 
   def parse(args: Array[String]): Option[FraudDetectorConfig] = {
