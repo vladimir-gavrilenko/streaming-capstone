@@ -6,10 +6,10 @@ case class FraudDetectorConfig(
   redisHost: String = "redis",
   redisPort: String = "6379",
   redisPrefix: String = "bots",
+  redisCheckpoint: String = "file:///tmp/redis",
   cassandra: String = "cassandra",
   cassandraKeyspace: String = "fraud",
   cassandraTable: String = "bots",
-  redisCheckpoint: String = "file:///tmp/redis",
   cassandraCheckpoint: String = "file:///tmp/cassandra",
   botTtlSeconds: Int = 10,
   botThresholdIntervalSlideSeconds: Int = 1,
@@ -39,6 +39,10 @@ object FraudDetectorConfig {
       .required()
       .action((x, c) => c.copy(redisPrefix = x))
 
+    opt[String]("redis-checkpoint")
+      .required()
+      .action((x, c) => c.copy(redisCheckpoint = x))
+
     opt[String]("cassandra")
       .required()
       .action((x, c) => c.copy(cassandra = x))
@@ -49,10 +53,6 @@ object FraudDetectorConfig {
         val Array(keyspace, table) = x.split("\\.")
         c.copy(cassandraKeyspace = keyspace, cassandraTable = table)
       }
-
-    opt[String]("redis-checkpoint")
-      .required()
-      .action((x, c) => c.copy(redisCheckpoint = x))
 
     opt[String]("cassandra-checkpoint")
       .required()
