@@ -34,7 +34,12 @@ class Clients:
     @staticmethod
     def _create_kafka_producer():
         bootstrap_servers = os.environ['KAFKA']
-        return KafkaProducer(bootstrap_servers=bootstrap_servers)
+        return KafkaProducer(
+            bootstrap_servers=bootstrap_servers,
+            acks=1,
+            batch_size=500,
+            linger_ms=1000
+        )
 
     @staticmethod
     def _create_kafka_consumer():
