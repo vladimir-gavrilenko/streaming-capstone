@@ -20,8 +20,8 @@ def get_index():
 @app.route('/events', methods=['POST'])
 def create_events():
     event_time = datetime.now().timestamp()
-    ips: List[str] = request.form['ips'].split(',')
-    producer: KafkaProducer = Clients.get('kafka-producer')
+    ips = request.form['ips'].split(',')
+    producer = Clients.get('kafka-producer')
     for ip in ips:
         event = json.dumps({
             'ip': ip,
@@ -35,7 +35,7 @@ def create_events():
 
 @app.route('/bots')
 def get_bots():
-    redis_client: Redis = Clients.get('redis')
+    redis_client = Clients.get('redis')
     prefix = 'bots:'
     bots = [
         bot.decode()[len(prefix):]
@@ -46,7 +46,7 @@ def get_bots():
 
 @app.route('/total')
 def get_total():
-    cassandra_cluster: Cluster = Clients.get('cassandra')
+    cassandra_cluster = Clients.get('cassandra')
     with cassandra_cluster.connect() as session:
         total = session.execute('select count(*) from fraud.bots').one()[0]
         print(total)
@@ -55,8 +55,8 @@ def get_total():
 
 @app.route('/status')
 def get_status():
-    consumer: KafkaConsumer = Clients.get('kafka-consumer')
-    kafka_topics = consumer.topics()
+    kafka_consumer = Clients.get('kafka-consumer')
+    kafka_topics = kafka_consumer.topics()
     kafka_status = 'events' in kafka_topics
     redis_client: Redis = Clients.get('redis')
     redis_info = redis_client.info()
