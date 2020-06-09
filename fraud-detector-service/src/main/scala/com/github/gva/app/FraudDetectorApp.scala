@@ -34,6 +34,7 @@ object FraudDetectorApp {
       .builder()
       .config("spark.redis.host", config.redisHost)
       .config("spark.redis.port", config.redisPort)
+      .config("spark.cassandra.connection.host", config.cassandraHost)
       .getOrCreate()
     spark.sparkContext.setLogLevel("WARN")
     spark

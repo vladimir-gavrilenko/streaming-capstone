@@ -7,7 +7,8 @@ case class FraudDetectorConfig(
   redisPort: String = "6379",
   redisPrefix: String = "bots",
   redisCheckpoint: String = "file:///tmp/redis",
-  cassandra: String = "cassandra",
+  cassandraHost: String = "cassandra",
+  cassandraPort: String = "9042",
   cassandraKeyspace: String = "fraud",
   cassandraTable: String = "bots",
   cassandraCheckpoint: String = "file:///tmp/cassandra",
@@ -45,7 +46,10 @@ object FraudDetectorConfig {
 
     opt[String]("cassandra")
       .required()
-      .action((x, c) => c.copy(cassandra = x))
+      .action { case (x: String, c: FraudDetectorConfig) =>
+        val Array(host, port) = x.split(":")
+        c.copy(cassandraHost = host, cassandraPort = port)
+      }
 
     opt[String]("cassandra-table")
       .required()
