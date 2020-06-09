@@ -19,4 +19,4 @@ COPY ./*.sh ${KAFKA_HOME}/
 EXPOSE 9092
 
 WORKDIR ${KAFKA_HOME}
-CMD ["./start.sh", "${ZOOKEEPER}"]
+CMD ["./start.sh"]
