@@ -26,5 +26,5 @@ done
   --bot-ttl-seconds 20 \
   --bot-threshold-interval-slide-seconds 1 \
   --bot-threshold-interval-seconds 10 \
-  --bot-threshold-num-events-per-interval 20 \
+  --bot-threshold-num-events-per-interval 10 \
 
