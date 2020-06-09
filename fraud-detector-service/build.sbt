@@ -11,6 +11,7 @@ lazy val root = (project in file("."))
       "org.apache.spark" %% "spark-sql" % sparkVersion % Provided,
       "com.github.scopt" %% "scopt" % "3.7.1",
       "com.redislabs" %% "spark-redis" % "2.5.0",
+      "com.datastax.spark" %% "spark-cassandra-connector" % "2.5.0",
       "com.holdenkarau" %% "spark-testing-base" % s"${sparkVersion}_0.14.0" % Test
     ),
     assemblyJarName in assembly := "fraud-detector-service.jar",

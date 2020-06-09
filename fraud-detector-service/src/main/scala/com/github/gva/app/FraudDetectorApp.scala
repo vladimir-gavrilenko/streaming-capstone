@@ -1,12 +1,11 @@
 package com.github.gva.app
 
 import com.github.gva.core.{Event, FraudDetector}
-import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.apache.spark.sql.catalyst.ScalaReflection
-import org.apache.spark.sql.functions.col
-import org.apache.spark.sql.functions.from_json
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.streaming.{OutputMode, StreamingQuery}
 import org.apache.spark.sql.types.{StringType, StructType}
+import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 
 object FraudDetectorApp {
   def main(args: Array[String]): Unit = {
@@ -62,7 +61,7 @@ object FraudDetectorApp {
   private def writeActiveBotsQuery(bots: DataFrame, config: FraudDetectorConfig): StreamingQuery = {
     bots
       .writeStream
-      .outputMode(OutputMode.Update) // AnalysisException: Complete output mode not supported when there are no streaming aggregations on streaming DataFrames/Datasets;
+      .outputMode(OutputMode.Complete)
       .foreachBatch { (batch: DataFrame, _) =>
         batch
           .write
@@ -78,9 +77,13 @@ object FraudDetectorApp {
 
   def writeBotsHistoryQuery(bots: DataFrame, config: FraudDetectorConfig): StreamingQuery = {
     bots
+      .select("ip")
+      .withColumn("marked_at", current_timestamp())
       .writeStream
-      .outputMode(OutputMode.Append)
-      .format("console")
+      .outputMode(OutputMode.Update)
+      .format("org.apache.spark.sql.cassandra")
+      .option("keyspace", config.cassandraKeyspace)
+      .option("table", config.cassandraTable)
       .start()
   }
 }
