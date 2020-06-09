@@ -44,7 +44,7 @@ object FraudDetectorConfig {
     opt[String]("cassandra-table")
       .required()
       .action { case (x: String, c: FraudDetectorConfig) =>
-        val Array(keyspace, table) = x.split("\.")
+        val Array(keyspace, table) = x.split("\\.")
         c.copy(cassandraKeyspace = keyspace, cassandraTable = table)
       }
 

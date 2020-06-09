@@ -12,7 +12,8 @@ done
   --driver-memory 512M \
   --executor-memory 512M \
   --num-executors 1 \
-  --packages "org.apache.spark:spark-sql-kafka-0-10_2.11:${SPARK_VERSION}" \
+  --packages \
+  "org.apache.spark:spark-sql-kafka-0-10_2.11:${SPARK_VERSION},com.datastax.spark:spark-cassandra-connector_2.11:2.5.0" \
   ./fraud-detector-service.jar \
   --kafka-bootstrap-servers "${KAFKA}" \
   --kafka-topic events \
