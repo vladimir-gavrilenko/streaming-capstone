@@ -2,6 +2,7 @@
 
 
 ## Prerequisites
+0. JAVA_HOME
 1. sbt
 2. docker-compose
 
