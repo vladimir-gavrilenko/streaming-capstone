@@ -1,8 +1,7 @@
 package com.github.gva.core
 
-import org.apache.spark.sql.functions._
-
 import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions._
 
 /**
  * Bot detection algorithm:
@@ -19,10 +18,14 @@ class FraudDetector {
   ): DataFrame = {
     events
       .withColumn("timestamp", to_timestamp(col("epochSeconds")))
-      .withWatermark("timestamp", s"$windowDuration seconds")
+      .withWatermark("timestamp", s"$slideDuration seconds")
       .groupBy(
-        col("ip"),
-        window(col("timestamp"), s"$windowDuration seconds", s"$slideDuration seconds")
+        window(
+          timeColumn = col("timestamp"),
+          windowDuration = s"$windowDuration seconds",
+          slideDuration = s"$slideDuration seconds",
+          startTime = "0 seconds"),
+        col("ip")
       )
       .count()
       .filter(col("count") > eventsPerWindowThreshold)
