@@ -50,8 +50,6 @@ object FraudDetectorApp {
       .format("kafka")
       .option("kafka.bootstrap.servers", config.kafkaBootstrapServers)
       .option("subscribe", config.kafkaTopic)
-      .option("kafkaConsumer.pollTimeoutMs", 1000)
-      .option("fetchOffset.retryIntervalMs", 200)
       .load()
       .select(col("value").cast(StringType))
       .withColumn("parsed", from_json(col("value"), eventsSchema))
@@ -62,8 +60,9 @@ object FraudDetectorApp {
     bots
       .writeStream
       .option("checkpointLocation", config.redisCheckpoint)
-      .outputMode(OutputMode.Update)
+      .outputMode(OutputMode.Complete)
       .foreachBatch { (batch: DataFrame, _) =>
+        batch.show(truncate = false)
         batch
           .write
           .mode(SaveMode.Overwrite)
