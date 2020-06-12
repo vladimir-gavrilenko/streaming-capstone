@@ -23,7 +23,7 @@ done
   --cassandra "${CASSANDRA}" \
   --cassandra-table fraud.bots \
   --cassandra-checkpoint "${HISTORY_CHECKPOINT_LOCATION}" \
-  --bot-ttl-seconds 20 \
+  --bot-ttl-seconds 120 \
   --bot-threshold-interval-slide-seconds 1 \
   --bot-threshold-interval-seconds 10 \
   --bot-threshold-num-events-per-interval 10 \
