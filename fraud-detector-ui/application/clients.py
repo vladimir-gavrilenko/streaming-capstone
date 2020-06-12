@@ -38,7 +38,7 @@ class Clients:
             bootstrap_servers=bootstrap_servers,
             acks=1,
             batch_size=500,
-            linger_ms=1000
+            linger_ms=500
         )
 
     @staticmethod
